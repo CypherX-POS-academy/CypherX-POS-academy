@@ -79,7 +79,6 @@ struct MintingProgressView: View {
     
     func startAnimation() {
         phase = 0
-        // Generate random fake hash just for visual effect before real one arrives
         hashString = UUID().uuidString.replacingOccurrences(of: "-", with: "") + UUID().uuidString.replacingOccurrences(of: "-", with: "")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -91,7 +90,6 @@ struct MintingProgressView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             withAnimation { phase = 3 }
         }
-        // Step 4 will be triggered when the server responds
     }
     
     // 이 함수는 외부(UploadView)에서 서버 응답을 받았을 때 호출합니다.
