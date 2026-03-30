@@ -2,20 +2,31 @@
 //  ContentView.swift
 //  202603290001
 //
-//  Created by Gibeom Ko on 3/29/26.
-//
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
+    init() {
+        // 프리미엄 탭바 스타일 적용
+        UITabBar.appearance().backgroundColor = UIColor.black
+        UITabBar.appearance().unselectedItemTintColor = UIColor.gray
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            UploadView()
+                .tabItem {
+                    Label("Mint", systemImage: "plus.square.fill.on.square.fill")
+                }
+            
+            ListView()
+                .tabItem {
+                    Label("Explore", systemImage: "square.grid.2x2.fill")
+                }
         }
-        .padding()
+        .preferredColorScheme(.dark)
+        .accentColor(.purple)
     }
 }
 
