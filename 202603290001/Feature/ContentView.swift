@@ -6,32 +6,35 @@
 import SwiftUI
 
 struct ContentView: View {
-    
-    /*
-    init() {
-        // 프리미엄 탭바 스타일 적용
-        UITabBar.appearance().backgroundColor = UIColor.black
-        UITabBar.appearance().unselectedItemTintColor = UIColor.gray
+    enum TabType {
+        case library, upload, proof
     }
-     */
+        
+    @State private var selectedTab: TabType = .library
     
     var body: some View {
-        TabView {
-            UploadView()
-                .tabItem {
-                    Label("Mint", systemImage: "plus.square.fill.on.square.fill")
-                }
-            
+        TabView(selection: $selectedTab) {
             ListView()
                 .tabItem {
-                    Label("Explore", systemImage: "square.grid.2x2.fill")
+                    Image(selectedTab == .library ? "isSelectedLibraryButton" : "LibraryButton")
                 }
+                .tag(TabType.library)
+                        
+                        
+            UploadView()
+                .tabItem {
+                    Image(selectedTab == .upload ? "isSelectedUploadButton" : "UploadButton")
+                }
+                .tag(TabType.upload)
+                        
+
+            UploadView()
+                .tabItem {
+                    Image(selectedTab == .proof ? "isSelectedProofButton" : "ProofButton")
+                }
+                .tag(TabType.proof)
         }
         .preferredColorScheme(.dark)
-        .tint(.primary500)
-        .toolbarBackground(.black, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
-
     }
 }
 
