@@ -4,11 +4,39 @@ import AVFoundation
 import WebKit
 
 struct ListView: View {
-    // 서버 오류를 대비/테스트하기 위한 임시 목업 데이터!
+
+    // 임시 Mock 데이터
     let mockData: [Choreography] = [
-        Choreography(id: "tx1", title: "Hip Hop Groove", description: "강렬한 비트에 맞춘 힙합 그루브. 아이솔레이션을 위주로 구성된 안무입니다.", genre: "힙합", videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", hash: "8xdfa9c82b1...39abc1234f", explorerUrl: "https://explorer.solana.com/", createdAt: "2026-03-29"),
-        Choreography(id: "tx2", title: "Contemporary Flow", description: "플로어 워크와 감정선이 돋보이는 현대무용 작품.", genre: "코레오", videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", hash: "9b3c10cf88q...1x9r99xzpq", explorerUrl: "https://explorer.solana.com/", createdAt: "2026-03-29"),
-        Choreography(id: "tx3", title: "Urban Popping", description: "부드러움과 절도가 공존하는 어반 팝핑 프리스타일 세션.", genre: "스트릿", videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", hash: "2x41lkop12m...0wlz77kqp", explorerUrl: "https://explorer.solana.com/", createdAt: "2026-03-30")
+        Choreography(
+            id: "tx1",
+            title: "Hip Hop Groove",
+            description: "A hip-hop groove set to powerful beats, focusing on isolation techniques.",
+            genre: "Hip Hop",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            hash: "8xdfa9c82b1...39abc1234f",
+            explorerUrl: "https://explorer.solana.com/",
+            createdAt: "2026-03-29"
+        ),
+        Choreography(
+            id: "tx2",
+            title: "Contemporary Flow",
+            description: "A contemporary dance piece highlighting expressive emotion and floor work.",
+            genre: "Choreography",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            hash: "9b3c10cf88q...1x9r99xzpq",
+            explorerUrl: "https://explorer.solana.com/",
+            createdAt: "2026-03-29"
+        ),
+        Choreography(
+            id: "tx3",
+            title: "Urban Popping",
+            description: "An urban popping freestyle session blending smoothness with sharp precision.",
+            genre: "Street",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            hash: "2x41lkop12m...0wlz77kqp",
+            explorerUrl: "https://explorer.solana.com/",
+            createdAt: "2026-03-30"
+        )
     ]
     
     var body: some View {
