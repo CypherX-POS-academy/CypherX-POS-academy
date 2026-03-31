@@ -1,15 +1,18 @@
 import SwiftUI
 
 struct RecordView: View {
+    @State private var isSelected = false
+
     var body: some View {
-        HStack(alignment: .center, spacing: 7.99) {
-            Image("RecordButton")
+        Button {
+            isSelected.toggle()
+        } label: {
+            Image(isSelected ? "isSelectedRecordButton" : "RecordButton")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 358)
         }
-        .padding(.horizontal, 0)
-        .padding(.vertical, 16)
-        .frame(width: 358, alignment: .center)
-        .background(Color(red: 0.6, green: 0.27, blue: 1))
-        .cornerRadius(12)
+        .buttonStyle(.plain)
     }
 }
 
