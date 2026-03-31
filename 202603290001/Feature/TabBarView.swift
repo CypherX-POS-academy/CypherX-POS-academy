@@ -29,7 +29,7 @@ struct TabBarView: View {
             
             UploadView()
                 .tabItem {
-                    Image(selectedTab == .proof ? "PlusButton" : "PlusButton")
+                    Image(selectedTab == .myPage ? "isSelectedMyPageButton" : "MyPageButton")
                 }
                 .tag(TabType.myPage)
                         
