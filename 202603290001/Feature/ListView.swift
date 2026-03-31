@@ -43,6 +43,14 @@ struct ListView: View {
         ZStack(alignment: .top) {
             Color.black.edgesIgnoringSafeArea(.all)
             
+            HStack {
+                Spacer()
+                Image("SearchButton")
+                    .resizable()
+                    .frame(width: 18, height: 18)
+                    .padding(.trailing, 24)
+            }
+            
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
                     ForEach(mockData) { item in
@@ -305,4 +313,8 @@ struct SafariWebView: UIViewRepresentable {
         let request = URLRequest(url: url)
         uiView.load(request)
     }
+}
+
+#Preview {
+    ListView()
 }
