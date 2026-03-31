@@ -21,42 +21,41 @@ struct ProofView: View {
                 
                 // ─── 상단 네비게이션 바 ───
                 HStack {
-                    Image(systemName: "line.3.horizontal")
-                        .foregroundColor(.white)
-                    Spacer()
+                    Button {
+                        
+                    } label: {
+                        Image("isSelectedMenuButton")
+                    }
+
                     Text("New Proof")
                         .foregroundColor(.white)
                         .font(.title2)
                         .fontWeight(.bold)
                     Spacer()
-                    Image(systemName: "plus.circle")
-                        .foregroundColor(Color.purple)
+                    Button {
+                        
+                    } label: {
+                        Image("PlusButton")
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
                 
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 0) {
                         
                         // ─── 영상 업로드 박스 ───
                         ZStack {
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 12)
                                 .fill(Color(white: 0.15))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [8]))
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(style: StrokeStyle(lineWidth: 2, dash: [8]))
                                         .foregroundColor(Color(white: 0.4))
                                 )
                             
                             VStack(spacing: 12) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.purple.opacity(0.2))
-                                        .frame(width: 60, height: 60)
-                                    Image(systemName: "play.rectangle")
-                                        .font(.system(size: 26))
-                                        .foregroundColor(.purple)
-                                }
+                                Image(.bigViewButton)
                                 
                                 Text("Upload Video/Thumbnail")
                                     .foregroundColor(.white)
@@ -69,6 +68,7 @@ struct ProofView: View {
                             .padding(.vertical, 36)
                         }
                         .padding(.horizontal, 20)
+                        .padding(.vertical, 20)
                         
                         // ─── 제목 입력 ───
                         VStack(alignment: .leading, spacing: 8) {
@@ -77,6 +77,7 @@ struct ProofView: View {
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .padding(.horizontal, 20)
+                                .padding(.top, 20)
                             
                             TextField("Enter title...", text: $title)
                                 .foregroundColor(.white)
@@ -93,6 +94,7 @@ struct ProofView: View {
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .padding(.horizontal, 20)
+                                .padding(.top, 30)
                             
                             // ⚠️ TextEditor는 placeholder가 없어서 직접 만들어야 해요
                             ZStack(alignment: .topLeading) {
@@ -135,6 +137,7 @@ struct ProofView: View {
                                 .cornerRadius(14)
                         }
                         .padding(.horizontal, 20)
+                        .padding(.top, 20)
                         
                         // ─── 성공 카드 (isSubmitted가 true일 때만 표시) ───
                         if isSubmitted {

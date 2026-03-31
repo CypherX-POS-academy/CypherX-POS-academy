@@ -34,7 +34,7 @@ struct TabBarView: View {
                 .tag(TabType.myPage)
                         
 
-            UploadView()
+            ProofView()
                 .tabItem {
                     Image(selectedTab == .proof ? "isSelectedProofButton" : "ProofButton")
                 }
