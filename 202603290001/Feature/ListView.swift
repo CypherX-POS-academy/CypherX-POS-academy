@@ -131,45 +131,74 @@ struct FrontVideoView: View {
                 Color.black.edgesIgnoringSafeArea(.all)
             }
             
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(item.name)
-                        .font(.title)
-                        .bold()
+            VStack {
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(item.name)
+                            .font(.title)
+                            .bold()
+                        
+                        Text(item.title)
+                            .font(.title3)
+                            .bold()
+                        
+                        if let desc = item.description, !desc.isEmpty {
+                            Text(desc)
+                                .font(.subheadline)
+                                .lineLimit(2)
+                        }
+                    }
+                    .foregroundColor(.white)
                     
-                    Text(item.title)
-                        .font(.title3)
-                        .bold()
+                    Spacer()
                     
-                    if let desc = item.description, !desc.isEmpty {
-                        Text(desc)
-                            .font(.subheadline)
-                            .lineLimit(2)
+                    VStack(spacing: 24) {
+                        Image(item.profileImage)
+                            .resizable()
+                            .frame(width: 48, height: 48)
+                            .cornerRadius(24)
+                        
+                        VStack(spacing: 4) {
+                            Image("FilledProofButton")
+                            
+                            Text("PROOF")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(.primary300)
+                        }
                     }
                 }
-                .foregroundColor(.white)
                 
-                Spacer()
+                Divider()
+                    .background(Color.gray)
+                    .padding(.top, 21)
+                    .padding(.bottom, 12)
                 
-                VStack(spacing: 24) {
-                    Image(item.profileImage)
+                HStack(spacing: 6) {
+                    Image("walletVerificationIcon")
                         .resizable()
-                        .frame(width: 48, height: 48)
-                        .cornerRadius(24)
+                        .frame(width: 11, height: 11)
                     
-                    VStack(spacing: 4) {
-                        Image("FilledProofButton")
-                        
-                        Text("PROOF")
-                            .font(.system(size: 8, weight: .bold))
-                            .foregroundStyle(.primary300)
-                    }
+                    Text("Verified on Solana • \(shortAddress(item.solanaWalletAddress))")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(.gray)
+                    
+                    Spacer()
+                    
+                    Image("ShareButton1")
+                        .resizable()
+                        .frame(width: 9, height: 9)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 100)
 
         }
+    }
+    
+    func shortAddress(_ address: String) -> String {
+        let start = address.prefix(4)
+        let end = address.suffix(4)
+        return "\(start)...\(end)"
     }
 }
 
