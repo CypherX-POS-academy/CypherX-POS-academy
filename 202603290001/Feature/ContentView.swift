@@ -4,14 +4,16 @@
 //
 
 import SwiftUI
-import UIKit
 
 struct ContentView: View {
+    
+    /*
     init() {
         // 프리미엄 탭바 스타일 적용
         UITabBar.appearance().backgroundColor = UIColor.black
         UITabBar.appearance().unselectedItemTintColor = UIColor.gray
     }
+     */
     
     var body: some View {
         TabView {
@@ -26,7 +28,10 @@ struct ContentView: View {
                 }
         }
         .preferredColorScheme(.dark)
-        .accentColor(.purple)
+        .tint(.primary500)
+        .toolbarBackground(.black, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
+
     }
 }
 
