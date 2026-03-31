@@ -7,33 +7,81 @@ struct ListView: View {
     let mockData: [Choreography] = [
         Choreography(
             id: "tx1",
+            name: "@miro",
+            profileImage: "artistProfile1",
             title: "Hip Hop Groove",
             description: "A hip-hop groove set to powerful beats, focusing on isolation techniques.",
             genre: "Hip Hop",
             videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
             hash: "8xdfa9c82b1...39abc1234f",
-            explorerUrl: "https://explorer.solana.com/",
-            createdAt: "2026-03-29"
+            explorerUrl: "https://explorer.solana.com/address/4XH9abcDEF123456789",
+            createdAt: "2026-03-29",
+            solanaWalletAddress: "4XH9abcDEF123456789GhijkLmnoPQRstuVWXYZ"
         ),
         Choreography(
             id: "tx2",
+            name: "@neon",
+            profileImage: "artistProfile2",
             title: "Contemporary Flow",
             description: "A contemporary dance piece highlighting expressive emotion and floor work.",
             genre: "Choreography",
             videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             hash: "9b3c10cf88q...1x9r99xzpq",
-            explorerUrl: "https://explorer.solana.com/",
-            createdAt: "2026-03-29"
+            explorerUrl: "https://explorer.solana.com/address/7YkLmn456XYZabcdef",
+            createdAt: "2026-03-29",
+            solanaWalletAddress: "7YkLmn456XYZabcdef12345GhijkLMNOPqrstuv"
         ),
         Choreography(
             id: "tx3",
+            name: "mugu",
+            profileImage: "artistProfile1",
             title: "Urban Popping",
             description: "An urban popping freestyle session blending smoothness with sharp precision.",
             genre: "Street",
             videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
             hash: "2x41lkop12m...0wlz77kqp",
-            explorerUrl: "https://explorer.solana.com/",
-            createdAt: "2026-03-30"
+            explorerUrl: "https://explorer.solana.com/address/9QweRTY789asdfghjkl",
+            createdAt: "2026-03-30",
+            solanaWalletAddress: "9QweRTY789asdfghjklZXCVbnm1234567890abcd"
+        ),
+        Choreography(
+            id: "tx4",
+            name: "@meverick",
+            profileImage: "artistProfile2",
+            title: "Contemporary Flow",
+            description: "A contemporary dance piece highlighting expressive emotion and floor work.",
+            genre: "Choreography",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            hash: "9b3c10cf88q...1x9r99xzpq",
+            explorerUrl: "https://explorer.solana.com/address/AbC123SolanaXYZ",
+            createdAt: "2026-03-29",
+            solanaWalletAddress: "AbC123SolanaXYZ987654321mnopQRSTuvwxy"
+        ),
+        Choreography(
+            id: "tx5",
+            name: "@riolu",
+            profileImage: "artistProfile1",
+            title: "Urban Popping",
+            description: "An urban popping freestyle session blending smoothness with sharp precision.",
+            genre: "Street",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            hash: "2x41lkop12m...0wlz77kqp",
+            explorerUrl: "https://explorer.solana.com/address/Zyx987SolWallet",
+            createdAt: "2026-03-30",
+            solanaWalletAddress: "Zyx987SolWalletABCDE123456789fghijklmnop"
+        ),
+        Choreography(
+            id: "tx6",
+            name: "@rossi",
+            profileImage: "artistProfile2",
+            title: "Hip Hop Groove",
+            description: "A hip-hop groove set to powerful beats, focusing on isolation techniques.",
+            genre: "Hip Hop",
+            videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            hash: "8xdfa9c82b1...39abc1234f",
+            explorerUrl: "https://explorer.solana.com/address/SolAddr999XYZ",
+            createdAt: "2026-03-29",
+            solanaWalletAddress: "SolAddr999XYZabcdefghijk123456789LMNOPQR"
         )
     ]
     
