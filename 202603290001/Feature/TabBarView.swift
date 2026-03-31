@@ -1,13 +1,13 @@
 //
-//  ContentView.swift
+//  TabBarView.swift
 //  202603290001
 //
 
 import SwiftUI
 
-struct ContentView: View {
+struct TabBarView: View {
     enum TabType {
-        case library, upload, proof
+        case library, upload, myPage, proof
     }
         
     @State private var selectedTab: TabType = .library
@@ -26,6 +26,12 @@ struct ContentView: View {
                     Image(selectedTab == .upload ? "isSelectedUploadButton" : "UploadButton")
                 }
                 .tag(TabType.upload)
+            
+            UploadView()
+                .tabItem {
+                    Image(selectedTab == .proof ? "PlusButton" : "PlusButton")
+                }
+                .tag(TabType.myPage)
                         
 
             UploadView()
@@ -39,5 +45,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    TabBarView()
 }
