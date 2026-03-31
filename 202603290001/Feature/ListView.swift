@@ -11,87 +11,20 @@ struct ListView: View {
         Choreography(id: "tx3", title: "Urban Popping", description: "부드러움과 절도가 공존하는 어반 팝핑 프리스타일 세션.", genre: "스트릿", videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", hash: "2x41lkop12m...0wlz77kqp", explorerUrl: "https://explorer.solana.com/", createdAt: "2026-03-30")
     ]
     
-    @State private var searchText = ""
-    @State private var selectedGenre = "All"
-    let genres = ["All", "힙합", "코레오", "스트릿", "방송댄스"]
-    
-    var filteredData: [Choreography] {
-        mockData.filter { item in
-            let matchSearch = searchText.isEmpty || item.title.localizedCaseInsensitiveContains(searchText) || (item.description?.localizedCaseInsensitiveContains(searchText) ?? false)
-            let matchGenre = selectedGenre == "All" || item.genre == selectedGenre
-            return matchSearch && matchGenre
-        }
-    }
-    
     var body: some View {
         ZStack(alignment: .top) {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            // 배경 비디오 스크롤 뷰 (필터링된 데이터 사용)
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
-                    if filteredData.isEmpty {
-                        Text("조건에 맞는 안무가 없습니다.")
-                            .foregroundColor(.gray)
-                            .frame(maxHeight: .infinity)
-                            .padding(.top, 200)
-                    } else {
-                        ForEach(filteredData) { item in
-                            TiktokCardView(item: item)
-                                .containerRelativeFrame([.horizontal, .vertical])
-                        }
+                    ForEach(mockData) { item in
+                        TiktokCardView(item: item)
+                            .containerRelativeFrame([.horizontal, .vertical])
                     }
                 }
             }
             .scrollTargetBehavior(.paging)
             .ignoresSafeArea(.all)
-            
-            // 상단 검색 및 칩(Chips) 필터 오버레이
-            VStack(spacing: 15) {
-                // 검색 바
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField("안무, 해시태그 검색...", text: $searchText)
-                        .foregroundColor(.white)
-                }
-                .padding(12)
-                .background(Color.white.opacity(0.15))
-                .cornerRadius(12)
-                .padding(.horizontal)
-                
-                // 장르 선택 스크롤 뷰 (검색어가 없을 때만 표시)
-                if searchText.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            ForEach(genres, id: \.self) { genre in
-                                Button(action: {
-                                    withAnimation {
-                                        selectedGenre = genre
-                                    }
-                                }) {
-                                    Text(genre)
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .padding(.horizontal, 18)
-                                        .padding(.vertical, 8)
-                                        .background(selectedGenre == genre ? Color.purple : Color.white.opacity(0.1))
-                                        .foregroundColor(.white)
-                                        .cornerRadius(20)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 5)
-                    }
-                }
-            }
-            // 탭바 및 상단 노치 회피/시인성 향상을 위한 그라데이션과 다이내믹 포지션
-            .padding(.top, 10)
-            .background(
-                LinearGradient(colors: [.black.opacity(0.8), .clear], startPoint: .top, endPoint: .bottom)
-                    .edgesIgnoringSafeArea(.top)
-            )
         }
     }
 }
