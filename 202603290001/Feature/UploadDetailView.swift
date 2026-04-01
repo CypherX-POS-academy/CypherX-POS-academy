@@ -11,8 +11,8 @@ import Photos
 struct UploadDetailsView: View {
     let selectedAsset: PHAsset?
  
-    @State private var title: String = ""
-    @State private var description: String = ""
+    @State private var choreographyTitle: String = ""
+    @State private var choreographyDesc: String = ""
     @State private var thumbnail: UIImage? = nil
     @State private var isRecording = false
     @State private var isRecorded = false
@@ -78,7 +78,7 @@ struct UploadDetailsView: View {
                                     .foregroundColor(.gray)
                                     .tracking(1.2)
  
-                                TextField("Enter title...", text: $title)
+                                TextField("Enter title...", text: $choreographyTitle)
                                     .font(.system(size: 15))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 14)
@@ -108,7 +108,7 @@ struct UploadDetailsView: View {
                                     .fill(Color(hex: "#1C1C1E"))
                                     .frame(minHeight: 120)
  
-                                if description.isEmpty {
+                                if choreographyDesc.isEmpty {
                                     Text("Tell the story of this movement...")
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
@@ -116,7 +116,7 @@ struct UploadDetailsView: View {
                                         .padding(.top, 14)
                                 }
  
-                                TextEditor(text: $description)
+                                TextEditor(text: $choreographyDesc)
                                     .font(.system(size: 14))
                                     .foregroundColor(.white)
                                     .scrollContentBackground(.hidden)
@@ -133,8 +133,8 @@ struct UploadDetailsView: View {
                         BlockchainRegistrationCard(
                             isRecording: $isRecording,
                             isRecorded: $isRecorded,
-                            title: title,          // API 전달용 파라미터 추가
-                            description: description // API 전달용 파라미터 추가
+                            choreographyTitle: choreographyTitle,
+                            choreographyDesc: choreographyDesc
                         )
                         .padding(.horizontal, 20)
                         .padding(.bottom, 100)
@@ -166,8 +166,8 @@ struct UploadDetailsView: View {
 struct BlockchainRegistrationCard: View {
     @Binding var isRecording: Bool
     @Binding var isRecorded: Bool
-    let title: String          // 외부에서 입력받을 제목
-    let description: String    // 외부에서 입력받을 설명
+    let choreographyTitle: String
+    let choreographyDesc: String
     @State private var pulseScale: CGFloat = 1.0
  
     var body: some View {
@@ -253,8 +253,8 @@ struct BlockchainRegistrationCard: View {
                     do {
                         // CrossmintAPI 싱글톤을 이용해 POST 민팅 요청
                         let transactionURL = try await CrossmintAPI.shared.mintChoreographyNFT(
-                            title: title, 
-                            description: description
+                            title: self.choreographyTitle, 
+                            description: self.choreographyDesc
                         )
                         
                         // 3. 메인 스레드로 돌아와서 성공 상태 업데이트
