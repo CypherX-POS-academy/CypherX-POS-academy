@@ -1,295 +1,292 @@
-import SwiftUI
-import PhotosUI
-import AVKit
 
-struct UploadView: View {
-    @StateObject private var networkManager = NetworkManager()
-    
-    @State private var title = ""
-    @State private var description = ""
+import SwiftUI
+
+import Photos
+import PhotosUI
+ 
+//MARK: 뷰 구조
+
+// VStack {
+//  영상 브피뷰
+//  Next 버튼(영상 업로드시에만)
+//  갤러리에 저장된 동영상들
+// }
+
+
+struct UPloadView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var videoURL: URL? = nil
-    @State private var isPickerPresented = false
-    
-    @State private var isProcessing = false
-    @State private var txId = ""
-    @State private var explorerUrl = ""
-    @State private var errorMessage = ""
-    
-    @State private var isShowingMinting = false
-    
+    @State private var authorizationStatus: PHAuthorizationStatus = .notDetermined
+    @State private var selectedAsset: PHAsset? = nil
+    @State private var recentVideos: [PHAsset] = []
+    @State private var navigateToDetails = false
+ 
     var body: some View {
-        ZStack {
-            // 프리미엄 다크 모드 배경 (프로덕트 느낌)
-            LinearGradient(gradient: Gradient(colors: [Color.black, Color(white: 0.1)]),
-                           startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            
-            ScrollView {
-                VStack(spacing: 25) {
-                    Text("Mint your Move")
-                        .font(.system(size: 34, weight: .black, design: .rounded))
-                        .foregroundColor(.white)
-                        .padding(.top, 40)
-                    
-                    Text("안무를 블록체인에 영구 기록하여 소유권을 증명하세요.")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    
-                    // Glassmorphism 입력 폼 묶음
-                    VStack(spacing: 25) {
-                        // 1. 제목 입력 및 샘플
-                        VStack(alignment: .leading, spacing: 10) {
-                            TextField("안무 제목", text: $title)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .colorScheme(.dark)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(["안무 창작", "무용 콩쿠르", "가요 커버", "코레오그래피", "프리스타일"], id: \.self) { sample in
-                                        Button(action: {
-                                            title = sample
-                                        }) {
-                                            Text(sample)
-                                                .font(.caption2)
-                                                .padding(.horizontal, 10)
-                                                .padding(.vertical, 6)
-                                                .background(Color.white.opacity(0.2))
-                                                .foregroundColor(.white)
-                                                .cornerRadius(10)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // 2. 설명 입력 및 태그
-                        VStack(alignment: .leading, spacing: 10) {
-                            TextField("간단한 설명 (태그를 눌러 추가해보세요)", text: $description)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .colorScheme(.dark)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 10) {
-                                    ForEach(["#코레오", "#힙합", "#스트릿", "#방송댄스", "#솔로루틴", "#창작안무", "#퍼포먼스"], id: \.self) { tag in
-                                        Button(action: {
-                                            if description.isEmpty {
-                                                description = tag
-                                            } else {
-                                                description += " " + tag
-                                            }
-                                        }) {
-                                            Text(tag)
-                                                .font(.caption)
-                                                .fontWeight(.medium)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 8)
-                                                .background(Color.white.opacity(0.15))
-                                                .foregroundColor(.white)
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 20)
-                                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                                                )
-                                                .cornerRadius(20)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.05))
-                    .cornerRadius(15)
-                    .padding(.horizontal)
-                    .padding(.bottom, 5)
-                    
-                    // 파일 선택 영역
-                    VStack {
-                        if let url = videoURL {
-                            VStack(spacing: 15) {
-                                // 썸네일/재생이 가능한 미니 다이내믹 플레이어
-                                VideoPlayer(player: AVPlayer(url: url))
-                                    .frame(height: 220)
-                                    .cornerRadius(15)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 15)
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                    )
-                                
-                                HStack {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
-                                    Text("비디오 업로드 준비 완료")
-                                        .foregroundColor(.green)
-                                        .font(.subheadline)
-                                    Spacer()
-                                    
-                                    Button(action: {
-                                        videoURL = nil
-                                        selectedItem = nil
-                                    }) {
-                                        Text("삭제")
-                                            .font(.subheadline)
-                                            .padding(.horizontal, 12).padding(.vertical, 6)
-                                            .background(Color.red.opacity(0.8))
-                                            .foregroundColor(.white)
-                                            .cornerRadius(8)
-                                    }
-                                    
-                                    Button(action: { isPickerPresented = true }) {
-                                        Text("다시 선택")
-                                            .font(.subheadline)
-                                            .padding(.horizontal, 12).padding(.vertical, 6)
-                                            .background(Color.white.opacity(0.1))
-                                            .foregroundColor(.blue)
-                                            .cornerRadius(8)
-                                    }
-                                }
-                                .padding(.horizontal, 5)
-                            }
-                        } else {
-                            Button(action: { isPickerPresented = true }) {
-                                VStack {
-                                    Image(systemName: "film.fill")
-                                        .font(.system(size: 40))
-                                    Text("앨범에서 영상 선택")
-                                        .padding(.top, 5)
-                                }
-                                .frame(maxWidth: .infinity, minHeight: 120)
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(15)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 15)
-                                        .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [10]))
-                                )
-                                .foregroundColor(.white)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .photosPicker(isPresented: $isPickerPresented, selection: $selectedItem, matching: .videos)
-                    .onChange(of: selectedItem) { newItem in
-                        Task {
-                            if let item = newItem {
-                                // 임시 디렉토리로 동영상 로드
-                                if let url = try? await item.loadTransferable(type: VideoTransferable.self)?.url {
-                                    DispatchQueue.main.async {
-                                        self.videoURL = url
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    Button(action: startMinting) {
-                        Text("블록체인 기록 개시 (Mint)")
-                            .font(.headline)
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+ 
+                VStack(spacing: 0) {
+
+                    // MARK: 영상 프리뷰
+                    ZStack(alignment: .topLeading) {
+                        Rectangle()
+                            .fill(Color(hex: "#1A1A2E"))
                             .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(colors: isProcessing ? [.gray, .gray] : [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                            )
-                            .foregroundColor(.white)
-                            .cornerRadius(15)
-                            .shadow(color: isProcessing ? .clear : .purple.opacity(0.5), radius: 10, x: 0, y: 5)
+                            .frame(height: 280)               
+                            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(hex: "#7B2FBE"), lineWidth: 1))
+                            .clipShape(RoundedRectangle(cornerRadius: 16)) 
+
+                        if let asset = selectedAsset {
+                            AssetThumbnailView(asset: asset, size: CGSize(width: UIScreen.main.bounds.width, height: 280))
+                                .frame(height: 280)      
+                                .clipShape(RoundedRectangle(cornerRadius: 16)) 
+                                
+                        } else {
+                            VStack(spacing: 12) {
+                                Image(systemName: "video.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(Color(hex: "#7B2FBE").opacity(0.6))
+                                Text("Select a video below")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
                     }
-                    .disabled(isProcessing)
-                    .padding(.horizontal)
-                    
-                    // 결과 메시지 영역
-                    if !errorMessage.isEmpty {
-                        Text(errorMessage).foregroundColor(.red).padding()
+                    .clipShape(RoundedRectangle(cornerRadius: 16))                     
+
+                    // MARK: Next버튼 - ZStack 밖, 프리뷰 바로 아래
+                    if selectedAsset != nil {
+                        Button(action: { navigateToDetails = true }) {
+                            Text("Next")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(Color(hex: "#BF5AF2"))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                        }
+                        .background(Color(hex: "#1C1C1E"))
                     }
+ 
+                    // MARK: Next버튼
                     
-                    if !explorerUrl.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Validation Success!").foregroundColor(.green)
-                            
-                            if let safariUrl = URL(string: explorerUrl) {
-                                Link(destination: safariUrl) {
-                                    HStack {
-                                        Image(systemName: "link.circle.fill")
-                                        Text("솔라나 원장 확인")
-                                    }
-                                    .padding()
-                                    .background(Color.white.opacity(0.1))
-                                    .cornerRadius(10)
-                                    .foregroundColor(.cyan)
+ 
+                    // MARK: 최근영상 스택
+                    HStack {
+                        HStack(spacing: 4) {
+                            Text("Recent Videos")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.white)
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 11))
+                                .foregroundColor(.white)
+                        }
+                        Spacer()
+                        
+                        //목업에서는 복사하기, 카메라 아이콘이 있는데 아직 구현안함
+//                        Image(systemName: "square.on.square").foregroundColor(.white).font(.system(size: 16))
+//                        Image(systemName: "camera").foregroundColor(.white).font(.system(size: 16))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color(hex: "#111111"))
+ 
+                    // MARK: 동영상 리스트들
+                    switch authorizationStatus {
+                    case .authorized, .limited:
+                        ScrollView {
+                            LazyVGrid(
+                                columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 4),
+                                spacing: 2
+                            ) {
+                                ForEach(recentVideos, id: \.localIdentifier) { asset in
+                                    VideoThumbnailCell(
+                                        asset: asset,
+                                        isSelected: selectedAsset?.localIdentifier == asset.localIdentifier,
+                                        onTap: {
+                                            withAnimation(.spring()) {
+                                                selectedAsset = asset
+                                            }
+                                        }
+                                    )
                                 }
                             }
+                            .padding(2)                       
                         }
-                        .padding(.top, 20)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+ 
+                    case .denied, .restricted:
+                        VStack(spacing: 16) {
+                            Image(systemName: "video.slash.fill").font(.system(size: 40)).foregroundColor(.gray)
+                            Text("Photo library access denied").foregroundColor(.gray)
+                            Button("Open Settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            .foregroundColor(Color(hex: "#BF5AF2"))
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+ 
+                    default:
+                        ProgressView()
+                            .tint(Color(hex: "#BF5AF2"))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    
-                    Spacer(minLength: 50)
                 }
             }
-            
-            if isShowingMinting {
-                MintingProgressView(isVisible: $isShowingMinting)
+            .navigationBarHidden(true)
+            .navigationDestination(isPresented: $navigateToDetails) {
+                UploadDetailsView(selectedAsset: selectedAsset)
+            }
+        }
+        .onAppear { //클릭시 권한 요청로 구현함 추후 앱 첫 시작할때로 변경할 예정
+            requestPermissionAndLoadVideos()
+        }
+    }
+ 
+    // Helpers
+    @ViewBuilder
+    private func actionButton(icon: String) -> some View {
+        Image(systemName: icon)
+            .font(.system(size: 13))
+            .foregroundColor(.white)
+            .frame(width: 34, height: 34)
+            .background(Color.black.opacity(0.7))
+            .clipShape(Circle())
+    }
+ 
+    private func requestPermissionAndLoadVideos() {
+        let current = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        if current == .notDetermined {
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                DispatchQueue.main.async {
+                    self.authorizationStatus = status
+                    if status == .authorized || status == .limited {
+                        self.fetchRecentVideos()
+                    }
+                }
+            }
+        } else {
+            authorizationStatus = current
+            if current == .authorized || current == .limited {
+                fetchRecentVideos()
             }
         }
     }
-    
-    func startMinting() {
-        // 비어있는 경우 시각적 경고
-        guard !title.isEmpty else {
-            errorMessage = "⚠️ 안무 제목을 입력해주세요."
-            return
-        }
-        guard let url = videoURL else {
-            errorMessage = "⚠️ 블록체인에 영구 기록할 영상을 첨부해주세요."
-            return
-        }
-        
-        isProcessing = true
-        errorMessage = ""
-        txId = ""
-        explorerUrl = ""
-        
-        // 애니메이션 뷰 오버레이 ON
-        isShowingMinting = true
-        
-        let creatorAddr = "user_wallet_8899"
-        
-        // MVP 데모를 위해 서버 통신을 바이패스하고 가상(Mock) 딜레이 후 성공 처리합니다.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.isProcessing = false
-            
-            // 임의의 Mock 트랜잭션 데이터 생성
-            self.txId = "5YVdjd... " + UUID().uuidString.prefix(6)
-            self.explorerUrl = "https://solscan.io/tx/demo"
-            
-            // 성공 후 1.5초 뒤에 멘트 확인 끝내고 애니메이션 뷰 오프 및 초기화
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation {
-                    self.isShowingMinting = false
-                }
-                self.title = ""
-                self.description = ""
-                self.videoURL = nil
-                self.selectedItem = nil
-            }
-        }
+ 
+    private func fetchRecentVideos() {
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        options.fetchLimit = 60
+        let result = PHAsset.fetchAssets(with: .video, options: options)
+        var assets: [PHAsset] = []
+        result.enumerateObjects { asset, _, _ in assets.append(asset) }
+        DispatchQueue.main.async { self.recentVideos = assets }
     }
 }
-
-// PhotosPicker에서 비디오 임시 URL을 가져오기 위한 유틸
-struct VideoTransferable: Transferable {
-    let url: URL
-    
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(contentType: .movie) { movie in
-            SentTransferredFile(movie.url)
-        } importing: { received in
-            let copy = URL(fileURLWithPath: NSTemporaryDirectory() + received.file.lastPathComponent)
-            if FileManager.default.fileExists(atPath: copy.path) {
-                try FileManager.default.removeItem(at: copy)
+ 
+// MARK: 동영상 썸네일
+struct VideoThumbnailCell: View {
+    let asset: PHAsset
+    let isSelected: Bool
+    let onTap: () -> Void
+    @State private var thumbnail: UIImage? = nil
+ 
+    private var cellSize: CGFloat { (UIScreen.main.bounds.width - 6) / 4 }
+ 
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            Group {
+                if let img = thumbnail {
+                    Image(uiImage: img).resizable().scaledToFit()
+                } else {
+                    Color(hex: "#1C1C1E")
+                }
             }
-            try FileManager.default.copyItem(at: received.file, to: copy)
-            return VideoTransferable(url: copy)
+            .frame(width: cellSize, height: cellSize)
+            .clipped()
+ 
+            // 버퍼링
+            let dur = Int(asset.duration)
+            Text(String(format: "%d:%02d", dur / 60, dur % 60))
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.white)
+                .padding(.horizontal, 4).padding(.vertical, 2)
+                .background(Color.black.opacity(0.6))
+                .cornerRadius(3)
+                .padding(4)
+ 
+            if isSelected {
+                // 선택 테두리
+                Rectangle()
+                    .stroke(Color(hex: "#BF5AF2"), lineWidth: 3)
+                    .frame(width: cellSize, height: cellSize)
+ 
+                // 번호 뱃지
+                Circle()
+                    .fill(Color(hex: "#BF5AF2"))
+                    .frame(width: 22, height: 22)
+                    .overlay(Text("1").font(.system(size: 11, weight: .bold)).foregroundColor(.white))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(4)
+            }
+        }
+        .onTapGesture { onTap() }
+        .onAppear { loadThumbnail() }
+    }
+ 
+    private func loadThumbnail() {
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .opportunistic
+        PHImageManager.default().requestImage(
+            for: asset, targetSize: CGSize(width: 120, height: 120),
+            contentMode: .aspectFill, options: options
+        ) { image, _ in DispatchQueue.main.async { self.thumbnail = image } }
+    }
+}
+ 
+// MARK: 선택된 영상의 썸네일을 크게 보여주는 뷰예요.
+struct AssetThumbnailView: View {
+    let asset: PHAsset
+    let size: CGSize
+    @State private var image: UIImage? = nil
+
+    var body: some View {
+        Group {
+            if let img = image {
+                Image(uiImage: img)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 280)      // ✅ 이 줄 추가
+                    .clipped()              // ✅ 이 줄 추가
+            } else {
+                Color(hex: "#1A1A2E")
+                    .overlay(ProgressView().tint(Color(hex: "#BF5AF2")))
+            }
+        }
+        .onAppear { loadImage() }
+        .onChange(of: asset) { _ in   // ✅ 추가
+            image = nil               // 이전 이미지 초기화
+            loadImage()               // 새 영상 로드
         }
     }
+
+    private func loadImage() {
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .highQualityFormat
+        PHImageManager.default().requestImage(
+            for: asset, targetSize: size,
+            contentMode: .aspectFit,
+            options: options
+        ) { img, _ in DispatchQueue.main.async { self.image = img } }
+    }
+}
+ 
+
+ 
+#Preview {
+    UPloadView()
 }
