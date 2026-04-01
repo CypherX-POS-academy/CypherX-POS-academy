@@ -170,7 +170,7 @@ struct UploadView: View {
                     }
                     .padding(.horizontal)
                     .photosPicker(isPresented: $isPickerPresented, selection: $selectedItem, matching: .videos)
-                    .onChange(of: selectedItem) { newItem in
+                    .onChange(of: selectedItem) { _, newItem in
                         Task {
                             if let item = newItem {
                                 // 임시 디렉토리로 동영상 로드
@@ -239,7 +239,7 @@ struct UploadView: View {
             errorMessage = "⚠️ 안무 제목을 입력해주세요."
             return
         }
-        guard let url = videoURL else {
+        guard videoURL != nil else {
             errorMessage = "⚠️ 블록체인에 영구 기록할 영상을 첨부해주세요."
             return
         }
@@ -252,25 +252,29 @@ struct UploadView: View {
         // 애니메이션 뷰 오버레이 ON
         isShowingMinting = true
         
-        let creatorAddr = "user_wallet_8899"
-        
-        // MVP 데모를 위해 서버 통신을 바이패스하고 가상(Mock) 딜레이 후 성공 처리합니다.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.isProcessing = false
-            
-            // 임의의 Mock 트랜잭션 데이터 생성
-            self.txId = "5YVdjd... " + UUID().uuidString.prefix(6)
-            self.explorerUrl = "https://solscan.io/tx/demo"
-            
-            // 성공 후 1.5초 뒤에 멘트 확인 끝내고 애니메이션 뷰 오프 및 초기화
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation {
+        // Crossmint API 연동: 실제로 외부 인프라를 통해 Solana 원장에 NFT(소유권)를 기록합니다.
+        CrossmintAPI.shared.mintChoreographyNFT(title: title, description: description) { success, resultTxId, resultUrl in
+            DispatchQueue.main.async {
+                self.isProcessing = false
+                
+                if success {
+                    self.txId = resultTxId
+                    self.explorerUrl = resultUrl
+                    
+                    // 성공 후 1.5초 뒤에 멘트 확인 끝내고 애니메이션 뷰 오프 및 초기화
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation {
+                            self.isShowingMinting = false
+                        }
+                        self.title = ""
+                        self.description = ""
+                        self.videoURL = nil
+                        self.selectedItem = nil
+                    }
+                } else {
+                    self.errorMessage = resultUrl // 에러 메시지가 resultUrl로 전달됨
                     self.isShowingMinting = false
                 }
-                self.title = ""
-                self.description = ""
-                self.videoURL = nil
-                self.selectedItem = nil
             }
         }
     }
