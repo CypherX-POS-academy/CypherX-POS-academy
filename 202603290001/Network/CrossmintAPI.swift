@@ -14,7 +14,7 @@ class CrossmintAPI {
     private let clientSecret = "sk_staging_5uTtcPtgJwBDLK7S6RotpaN1npfjzJQDrBoD26oaSxC43jsYyQaiVuKgVG6MCJ7to7mMsc1iQCKhBeCq5RXqCPfyPifMoMFcyihQ7RZMKcQpLkM4Z4GZJnbWHCv38c1jPou31QWuTQZB46sTQ8ym8vjCZ5XqHLH5AxF1Uwh4XBqw2UifFe4QFHtewoUKgQtSSD2mABf7jHGuJ6dkFLUDEzTK"
     // 민팅받을 솔라나 지갑 주소 명시 (예: "solana:YOUR_WALLET_ADDRESS")
     // 이메일 수신이라면 "email:youremail@example.com:solana" 등을 사용할 수 있습니다.
-    private let recipientAddress = "solana:Cwyakb4hyQxJrzceu3LjFpDTXRTiJJKzTPiLfiu7ZmrV"
+    private let recipientAddress = "solana:GN1wbYc5ZjfPftvCFWKhxf1eTpMa3EuKx2qXPmB5xqNE"
     
     private init() {}
     
