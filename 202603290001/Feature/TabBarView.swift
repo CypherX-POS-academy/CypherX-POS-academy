@@ -21,24 +21,19 @@ struct TabBarView: View {
                 .tag(TabType.library)
                         
                         
-            UploadView()
+            UPloadView()
                 .tabItem {
                     Image(selectedTab == .upload ? "isSelectedUploadButton" : "UploadButton")
                 }
                 .tag(TabType.upload)
             
-            UploadView()
+            
+            MyPageView()
                 .tabItem {
                     Image(selectedTab == .myPage ? "isSelectedMyPageButton" : "MyPageButton")
                 }
                 .tag(TabType.myPage)
-                        
-
-            UploadView()
-                .tabItem {
-                    Image(selectedTab == .proof ? "isSelectedProofButton" : "ProofButton")
-                }
-                .tag(TabType.proof)
+            
         }
         .preferredColorScheme(.dark)
     }
