@@ -8,19 +8,45 @@
 import SwiftUI
  
 struct MyPageView: View {
+    
+    @State private var showCredential: Bool = false
+    
     var body: some View {
         ZStack {
             Color(hex: "#0D0D0D").ignoresSafeArea()
  
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ProfileHeaderSection()
-                    StatsSection()
-                    FeaturedVideoSection()
-                    DanceStylesSection()
-                    LatestProofsSection()
- 
-                    Spacer().frame(height: 100) // 탭바 공간
+            if showCredential {
+                CredentialModalView(isPresented: $showCredential)
+                    .zIndex(1)
+            }
+            
+            VStack( spacing: 0) {
+                HStack(spacing:0) {
+                    Text("Potfolio Proof")
+                        .foregroundStyle(.white)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                            showCredential = true
+                        }
+                    } label: {
+                        Image("isSelectedProofButton")
+                    }
+                }
+                .padding(20)
+                .background(Color.clear)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        ProfileHeaderSection()
+                        StatsSection()
+                        FeaturedVideoSection()
+                        DanceStylesSection()
+                        LatestProofsSection()
+     
+                        Spacer().frame(height: 100) // 탭바 공간
+                    }
                 }
             }
         }
@@ -32,7 +58,7 @@ struct MyPageView: View {
 struct ProfileHeaderSection: View {
     var body: some View {
         VStack(spacing: 14) {
-            Spacer().frame(height: 60) // 네비바 공간
+            Spacer().frame(height: 30) // 네비바 공간
  
             // 프로필 이미지
             ZStack(alignment: .bottomTrailing) {

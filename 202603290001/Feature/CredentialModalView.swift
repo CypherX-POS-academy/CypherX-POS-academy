@@ -28,6 +28,7 @@ struct CredentialModalView: View {
             // ─── 2. 글래스 카드 ───
             glassCard
                 .padding(.horizontal, 28)
+                .padding(.vertical, 140)
                 // 카드 탭은 닫기 막기
                 .onTapGesture {}
         }
@@ -191,23 +192,3 @@ struct CredentialModalView: View {
 #Preview {
     CredentialModalView(isPresented: .constant(true))
 }
-
-
-//// ① 파일 상단 @State 변수 추가 (기존 변수들 아래에)
-//@State private var showCredential: Bool = false
-//
-//// ② SEND TO BLOCKCHAIN 버튼의 action 수정
-//Button {
-//    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-//        showCredential = true
-//    }
-//} label: {
-//    // ... 기존 label 코드 그대로 유지
-//}
-//
-//// ③ body의 ZStack 최상단 (Color.black 바로 위)에 추가
-//// ZStack { 안에 VStack 다음에 추가:
-//if showCredential {
-//    CredentialModalView(isPresented: $showCredential)
-//        .zIndex(1)  // 항상 맨 위에
-//}
