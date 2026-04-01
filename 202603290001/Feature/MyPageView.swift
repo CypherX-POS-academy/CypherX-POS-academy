@@ -31,7 +31,11 @@ struct MyPageView: View {
                             showCredential = true
                         }
                     } label: {
-                        Image("isSelectedProofButton")
+                        Image(systemName: "checkmark.shield")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 23, height: 23)
+                            .tint(.primary300)
                     }
                 }
                 .padding(20)
