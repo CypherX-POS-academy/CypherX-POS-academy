@@ -63,7 +63,7 @@ struct ListView: View {
             title: "Locking Funk Session",
             description: "A funky locking routine full of groove, character, and rhythmic accents.",
             genre: "Locking",
-            videoUrl: "asset://HipHopVideo",    // FIXME: 비디오 수정 예정
+            videoUrl: "asset://LockingVideo",
             hash: "2x41lkop12m...0wlz77kqp",
             explorerUrl: "https://explorer.solana.com/address/Zyx987SolWallet",
             createdAt: "2026-03-30",
@@ -76,7 +76,7 @@ struct ListView: View {
             title: "House Dance Vibes",
             description: "A high-energy house dance choreography emphasizing footwork and rhythm.",
             genre: "House",
-            videoUrl: "asset://HipHopVideo",    // FIXME: 비디오 수정 예정
+            videoUrl: "asset://HouseVideo",
             hash: "8xdfa9c82b1...39abc1234f",
             explorerUrl: "https://explorer.solana.com/address/SolAddr999XYZ",
             createdAt: "2026-03-29",
