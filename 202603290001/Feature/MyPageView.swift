@@ -184,22 +184,29 @@ struct FeaturedVideoSection: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             // 배경 이미지 자리
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color(hex: "#1A1A2E"), Color(hex: "#0D0D0D")],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(maxWidth: .infinity)
+//            Rectangle()
+//                .fill(
+//                    LinearGradient(
+//                        colors: [Color(hex: "#1A1A2E"), Color(hex: "#0D0D0D")],
+//                        startPoint: .top,
+//                        endPoint: .bottom
+//                    )
+//                )
+//                .frame(maxWidth: .infinity)
+//                .frame(height: 200)
+//                .overlay(
+//                    // 영상 배경 placeholder
+//                    Image(systemName: "person.fill")
+//                        .font(.system(size: 60))
+//                        .foregroundColor(Color.white.opacity(0.1))
+//                )
+            Image("proof")
+                .resizable()
+                .scaledToFill()
                 .frame(height: 200)
-                .overlay(
-                    // 영상 배경 placeholder
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(Color.white.opacity(0.1))
-                )
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal, 5)
+               
  
             // 그라데이션 오버레이
             LinearGradient(
@@ -306,48 +313,64 @@ struct StyleChip: View {
  
 // MARK: - 최근 증명 섹션
 struct LatestProofsSection: View {
-    // 실제 데이터로 교체 예정
-    let proofs: [(title: String, color: Color)] = [
-        ("Proof 1", Color(hex: "#1A1A2E")),
-        ("Proof 2", Color(hex: "#2A0A2E")),
-        ("Proof 3", Color(hex: "#0A1A2E")),
-        ("Proof 4", Color(hex: "#1A2A0E")),
+    let proofs: [(title: String, imageName: String)] = [
+        ("Hip-Hop Flow", "proof1"),
+        ("Urban Street", "proof2"),
+        ("Contemporary", "proof3"),
+        ("Lyrical Stage", "proof4"),
     ]
- 
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Latest Proofs")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .padding(.horizontal, 20)
- 
+
             LazyVGrid(
                 columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                 spacing: 8
             ) {
                 ForEach(proofs, id: \.title) { proof in
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(proof.color)
+                    ZStack(alignment: .topTrailing) {
+                        // 실제 이미지
+                        Image(proof.imageName)
+                            .resizable()
+                            .scaledToFill()
                             .frame(height: 160)
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 36))
-                                    .foregroundColor(.white.opacity(0.1))
-                            )
- 
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+
                         // 블록체인 인증 아이콘
+                        Image(systemName: "checkmark.shield.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color(hex: "#BF5AF2"))
+                            .padding(8)
+                            .background(Color.black.opacity(0.5))
+                            .clipShape(Circle())
+                            .padding(8)
+
+                        // 하단 제목
                         VStack {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "checkmark.shield.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color(hex: "#BF5AF2"))
-                                    .padding(8)
-                            }
                             Spacer()
+                            HStack {
+                                Text(proof.title)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                Spacer()
+                            }
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.clear, Color.black.opacity(0.7)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                         }
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
+                    .frame(height: 160)
                 }
             }
             .padding(.horizontal, 20)
