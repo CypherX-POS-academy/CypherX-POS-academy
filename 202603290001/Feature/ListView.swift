@@ -2,7 +2,6 @@ import SwiftUI
 import AVFoundation
 
 struct ListView: View {
-
     // 임시 Mock 데이터
     let mockData: [Choreography] = [
         Choreography(
@@ -12,7 +11,7 @@ struct ListView: View {
             title: "Hip Hop Groove",
             description: "A hip-hop groove set to powerful beats, focusing on isolation techniques.",
             genre: "Hip Hop",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            videoUrl: "asset://HipHopVideo",
             hash: "8xdfa9c82b1...39abc1234f",
             explorerUrl: "https://explorer.solana.com/address/4XH9abcDEF123456789",
             createdAt: "2026-03-29",
@@ -25,7 +24,7 @@ struct ListView: View {
             title: "Contemporary Flow",
             description: "A contemporary dance piece highlighting expressive emotion and floor work.",
             genre: "Contemporary",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            videoUrl: "asset://ContemporaryVideo",
             hash: "9b3c10cf88q...1x9r99xzpq",
             explorerUrl: "https://explorer.solana.com/address/7YkLmn456XYZabcdef",
             createdAt: "2026-03-29",
@@ -38,7 +37,7 @@ struct ListView: View {
             title: "Urban Popping",
             description: "An urban popping freestyle session blending smoothness with sharp precision.",
             genre: "Popping",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            videoUrl: "asset://PoppingVideo",
             hash: "2x41lkop12m...0wlz77kqp",
             explorerUrl: "https://explorer.solana.com/address/9QweRTY789asdfghjkl",
             createdAt: "2026-03-30",
@@ -46,12 +45,12 @@ struct ListView: View {
         ),
         Choreography(
             id: "tx4",
-            name: "@meverick",
+            name: "@maverick",
             profileImage: "artistProfile2",
             title: "Jazz Fusion Motion",
             description: "A jazz-inspired choreography blending fluid transitions with dynamic musicality.",
             genre: "Jazz",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            videoUrl: "asset://JazzVideo",
             hash: "9b3c10cf88q...1x9r99xzpq",
             explorerUrl: "https://explorer.solana.com/address/AbC123SolanaXYZ",
             createdAt: "2026-03-29",
@@ -64,7 +63,7 @@ struct ListView: View {
             title: "Locking Funk Session",
             description: "A funky locking routine full of groove, character, and rhythmic accents.",
             genre: "Locking",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+            videoUrl: "asset://HipHopVideo",    // FIXME: 비디오 수정 예정
             hash: "2x41lkop12m...0wlz77kqp",
             explorerUrl: "https://explorer.solana.com/address/Zyx987SolWallet",
             createdAt: "2026-03-30",
@@ -77,7 +76,7 @@ struct ListView: View {
             title: "House Dance Vibes",
             description: "A high-energy house dance choreography emphasizing footwork and rhythm.",
             genre: "House",
-            videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            videoUrl: "asset://HipHopVideo",    // FIXME: 비디오 수정 예정
             hash: "8xdfa9c82b1...39abc1234f",
             explorerUrl: "https://explorer.solana.com/address/SolAddr999XYZ",
             createdAt: "2026-03-29",
@@ -121,11 +120,12 @@ struct TiktokCardView: View {
 
 struct FrontVideoView: View {
     let item: Choreography
+    @State private var isVideoVisible = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            if let url = URL(string: item.videoUrl) {
-                LoopingPlayerView(url: url)
+            if let url = VideoAssetURLResolver.resolve(item.videoUrl) {
+                LoopingPlayerView(url: url, isPlaying: isVideoVisible)
                     .edgesIgnoringSafeArea(.all)
             } else {
                 Color.black.edgesIgnoringSafeArea(.all)
@@ -193,6 +193,9 @@ struct FrontVideoView: View {
             .padding(.bottom, 100)
 
         }
+        .onScrollVisibilityChange(threshold: 0.95) { isVisible in
+            isVideoVisible = isVisible
+        }
     }
     
     func shortAddress(_ address: String) -> String {
@@ -202,9 +205,43 @@ struct FrontVideoView: View {
     }
 }
 
+enum VideoAssetURLResolver {
+    private static let assetScheme = "asset://"
+    
+    static func resolve(_ source: String) -> URL? {
+        if source.hasPrefix(assetScheme) {
+            let assetName = String(source.dropFirst(assetScheme.count))
+            return localAssetURL(named: assetName)
+        }
+        
+        return URL(string: source)
+    }
+    
+    private static func localAssetURL(named assetName: String) -> URL? {
+        guard let asset = NSDataAsset(name: assetName) else {
+            return nil
+        }
+        
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(assetName)
+            .appendingPathExtension("mp4")
+        
+        if !FileManager.default.fileExists(atPath: fileURL.path) {
+            do {
+                try asset.data.write(to: fileURL, options: .atomic)
+            } catch {
+                return nil
+            }
+        }
+        
+        return fileURL
+    }
+}
+
 // 자동 반복 재생을 위한 AVFoundation 기반 비디오 플레이어 (커스텀 뷰)
 struct LoopingPlayerView: UIViewRepresentable {
     let url: URL
+    let isPlaying: Bool
     
     class Coordinator {
         var player: AVQueuePlayer?
@@ -229,8 +266,6 @@ struct LoopingPlayerView: UIViewRepresentable {
         context.coordinator.player = player
         context.coordinator.looper = looper
         
-        player.play()
-        
         return view
     }
     
@@ -241,6 +276,18 @@ struct LoopingPlayerView: UIViewRepresentable {
                 layer.frame = uiView.bounds
             }
         }
+
+        if isPlaying {
+            context.coordinator.player?.play()
+        } else {
+            context.coordinator.player?.pause()
+        }
+    }
+
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        coordinator.player?.pause()
+        coordinator.player?.removeAllItems()
+        coordinator.looper = nil
     }
 }
 
