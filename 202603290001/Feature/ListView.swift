@@ -85,16 +85,8 @@ struct ListView: View {
     ]
     
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
-            
-            HStack {
-                Spacer()
-                Image("SearchButton")
-                    .resizable()
-                    .frame(width: 18, height: 18)
-                    .padding(.trailing, 24)
-            }
             
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
@@ -114,7 +106,17 @@ struct TiktokCardView: View {
     let item: Choreography
     
     var body: some View {
-        FrontVideoView(item: item)
+        ZStack(alignment: .topTrailing) {
+            FrontVideoView(item: item)
+            
+            Button(action: {}) {
+                Image("SearchButton")
+                    .resizable()
+                    .frame(width: 18, height: 18)
+            }
+            .padding(.top, 60)
+            .padding(.trailing, 24)
+        }
     }
 }
 
