@@ -5,40 +5,44 @@
 
 import SwiftUI
 
+import Combine
+
+class TabRouter: ObservableObject {
+    @Published var selectedTab: TabType = .library
+}
+ 
+enum TabType {
+    case library, upload, myPage
+}
+ 
 struct TabBarView: View {
-    enum TabType {
-        case library, upload, myPage, proof
-    }
-        
-    @State private var selectedTab: TabType = .library
-    
+    @StateObject private var tabRouter = TabRouter()
+ 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $tabRouter.selectedTab) {
             ListView()
                 .tabItem {
-                    Image(selectedTab == .library ? "isSelectedLibraryButton" : "LibraryButton")
+                    Image(tabRouter.selectedTab == .library ? "isSelectedLibraryButton" : "LibraryButton")
                 }
                 .tag(TabType.library)
-                        
-                        
+ 
             UPloadView()
                 .tabItem {
-                    Image(selectedTab == .upload ? "isSelectedUploadButton" : "UploadButton")
+                    Image(tabRouter.selectedTab == .upload ? "isSelectedUploadButton" : "UploadButton")
                 }
                 .tag(TabType.upload)
-            
-            
+ 
             MyPageView()
                 .tabItem {
-                    Image(selectedTab == .myPage ? "isSelectedMyPageButton" : "MyPageButton")
+                    Image(tabRouter.selectedTab == .myPage ? "isSelectedMyPageButton" : "MyPageButton")
                 }
                 .tag(TabType.myPage)
-            
         }
         .preferredColorScheme(.dark)
+        .environmentObject(tabRouter) // ✅ 하위 뷰 전체에 주입
     }
 }
-
+ 
 #Preview {
     TabBarView()
 }

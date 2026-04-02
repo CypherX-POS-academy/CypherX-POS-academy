@@ -17,6 +17,7 @@ struct UploadDetailsView: View {
     @State private var isRecording = false
     @State private var isRecorded = false
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var tabRouter: TabRouter  // ✅ 탭 라우터 주입
  
     var body: some View {
         ZStack {
@@ -132,7 +133,13 @@ struct UploadDetailsView: View {
                         // MARK: - Blockchain Card
                         BlockchainRegistrationCard(
                             isRecording: $isRecording,
-                            isRecorded: $isRecorded
+                            isRecorded: $isRecorded,
+                            onComplete: {
+                                // ✅ 로딩 완료 후 ListView 탭으로 이동
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                    tabRouter.selectedTab = .library
+                                }
+                            }
                         )
                         .padding(.horizontal, 20)
                         .padding(.bottom, 100)
@@ -164,7 +171,7 @@ struct UploadDetailsView: View {
 struct BlockchainRegistrationCard: View {
     @Binding var isRecording: Bool
     @Binding var isRecorded: Bool
-    @State private var pulseScale: CGFloat = 1.0
+    var onComplete: () -> Void  // ✅ 완료 콜백 추가
  
     var body: some View {
         VStack(spacing: 0) {
@@ -243,7 +250,11 @@ struct BlockchainRegistrationCard: View {
             Button(action: {
                 withAnimation(.spring()) { isRecording = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    withAnimation(.spring()) { isRecording = false; isRecorded = true }
+                    withAnimation(.spring()) {
+                        isRecording = false
+                        isRecorded = true
+                    }
+                    onComplete()  // ✅ 완료 후 콜백 호출
                 }
             }) {
                 HStack(spacing: 10) {
