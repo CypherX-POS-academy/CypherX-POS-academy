@@ -11,7 +11,7 @@ struct ListView: View {
             title: "Hip Hop Groove",
             description: "A hip-hop groove set to powerful beats, focusing on isolation techniques.",
             genre: "Hip Hop",
-            videoUrl: "asset://HipHopVideo",
+            videoUrl: "asset://hipHopVideo",
             hash: "8xdfa9c82b1...39abc1234f",
             explorerUrl: "https://explorer.solana.com/address/4XH9abcDEF123456789",
             createdAt: "2026-03-29",
@@ -24,7 +24,7 @@ struct ListView: View {
             title: "Contemporary Flow",
             description: "A contemporary dance piece highlighting expressive emotion and floor work.",
             genre: "Contemporary",
-            videoUrl: "asset://ContemporaryVideo",
+            videoUrl: "asset://contemporaryVideo",
             hash: "9b3c10cf88q...1x9r99xzpq",
             explorerUrl: "https://explorer.solana.com/address/7YkLmn456XYZabcdef",
             createdAt: "2026-03-29",
@@ -37,7 +37,7 @@ struct ListView: View {
             title: "Urban Popping",
             description: "An urban popping freestyle session blending smoothness with sharp precision.",
             genre: "Popping",
-            videoUrl: "asset://PoppingVideo",
+            videoUrl: "asset://poppingVideo",
             hash: "2x41lkop12m...0wlz77kqp",
             explorerUrl: "https://explorer.solana.com/address/9QweRTY789asdfghjkl",
             createdAt: "2026-03-30",
@@ -50,7 +50,7 @@ struct ListView: View {
             title: "Jazz Fusion Motion",
             description: "A jazz-inspired choreography blending fluid transitions with dynamic musicality.",
             genre: "Jazz",
-            videoUrl: "asset://JazzVideo",
+            videoUrl: "asset://jazzVideo",
             hash: "9b3c10cf88q...1x9r99xzpq",
             explorerUrl: "https://explorer.solana.com/address/AbC123SolanaXYZ",
             createdAt: "2026-03-29",
@@ -63,7 +63,7 @@ struct ListView: View {
             title: "Locking Funk Session",
             description: "A funky locking routine full of groove, character, and rhythmic accents.",
             genre: "Locking",
-            videoUrl: "asset://LockingVideo",
+            videoUrl: "asset://lockingVideo",
             hash: "2x41lkop12m...0wlz77kqp",
             explorerUrl: "https://explorer.solana.com/address/Zyx987SolWallet",
             createdAt: "2026-03-30",
@@ -76,7 +76,7 @@ struct ListView: View {
             title: "House Dance Vibes",
             description: "A high-energy house dance choreography emphasizing footwork and rhythm.",
             genre: "House",
-            videoUrl: "asset://HouseVideo",
+            videoUrl: "asset://houseVideo",
             hash: "8xdfa9c82b1...39abc1234f",
             explorerUrl: "https://explorer.solana.com/address/SolAddr999XYZ",
             createdAt: "2026-03-29",
@@ -198,6 +198,12 @@ struct FrontVideoView: View {
         .onScrollVisibilityChange(threshold: 0.95) { isVisible in
             isVideoVisible = isVisible
         }
+        .onAppear {
+            isVideoVisible = true
+        }
+        .onDisappear {
+            isVideoVisible = false
+        }
     }
     
     func shortAddress(_ address: String) -> String {
@@ -221,22 +227,21 @@ enum VideoAssetURLResolver {
     
     private static func localAssetURL(named assetName: String) -> URL? {
         guard let asset = NSDataAsset(name: assetName) else {
+            print("VideoAssetURLResolver: missing data asset named \(assetName)")
             return nil
         }
         
         let fileURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent(assetName)
+            .appendingPathComponent("\(assetName)-\(UUID().uuidString)")
             .appendingPathExtension("mp4")
         
-        if !FileManager.default.fileExists(atPath: fileURL.path) {
-            do {
-                try asset.data.write(to: fileURL, options: .atomic)
-            } catch {
-                return nil
-            }
+        do {
+            try asset.data.write(to: fileURL, options: .atomic)
+            return fileURL
+        } catch {
+            print("VideoAssetURLResolver: failed to write asset \(assetName) to temp file: \(error)")
+            return nil
         }
-        
-        return fileURL
     }
 }
 
@@ -244,6 +249,19 @@ enum VideoAssetURLResolver {
 struct LoopingPlayerView: UIViewRepresentable {
     let url: URL
     let isPlaying: Bool
+    
+    final class PlayerContainerView: UIView {
+        override class var layerClass: AnyClass {
+            AVPlayerLayer.self
+        }
+        
+        var playerLayer: AVPlayerLayer {
+            guard let layer = layer as? AVPlayerLayer else {
+                fatalError("Expected AVPlayerLayer")
+            }
+            return layer
+        }
+    }
     
     class Coordinator {
         var player: AVQueuePlayer?
@@ -255,30 +273,28 @@ struct LoopingPlayerView: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> UIView {
-        let view = UIView()
+        let view = PlayerContainerView()
         let playerItem = AVPlayerItem(url: url)
-        let player = AVQueuePlayer(playerItem: playerItem)
-        let playerLayer = AVPlayerLayer(player: player)
+        let player = AVQueuePlayer()
         
-        playerLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(playerLayer)
+        player.isMuted = true
+        player.actionAtItemEnd = .none
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspectFill
         
         let looper = AVPlayerLooper(player: player, templateItem: playerItem)
         
         context.coordinator.player = player
         context.coordinator.looper = looper
         
+        if isPlaying {
+            player.play()
+        }
+        
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        // Safe Layout 업데이트
-        DispatchQueue.main.async {
-            if let layer = uiView.layer.sublayers?.first(where: { $0 is AVPlayerLayer }) {
-                layer.frame = uiView.bounds
-            }
-        }
-
         if isPlaying {
             context.coordinator.player?.play()
         } else {

@@ -11,13 +11,13 @@ import Photos
 struct UploadDetailsView: View {
     let selectedAsset: PHAsset?
  
-    @State private var title: String = ""
-    @State private var description: String = ""
+    @State private var choreographyTitle: String = ""
+    @State private var choreographyDesc: String = ""
     @State private var thumbnail: UIImage? = nil
     @State private var isRecording = false
     @State private var isRecorded = false
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var tabRouter: TabRouter  // ✅ 탭 라우터 주입
+    @EnvironmentObject var tabRouter: TabRouter  
  
     var body: some View {
         ZStack {
@@ -79,7 +79,7 @@ struct UploadDetailsView: View {
                                     .foregroundColor(.gray)
                                     .tracking(1.2)
  
-                                TextField("Enter title...", text: $title)
+                                TextField("Enter title...", text: $choreographyTitle)
                                     .font(.system(size: 15))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 14)
@@ -109,7 +109,7 @@ struct UploadDetailsView: View {
                                     .fill(Color(hex: "#1C1C1E"))
                                     .frame(minHeight: 120)
  
-                                if description.isEmpty {
+                                if choreographyDesc.isEmpty {
                                     Text("Tell the story of this movement...")
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
@@ -117,7 +117,7 @@ struct UploadDetailsView: View {
                                         .padding(.top, 14)
                                 }
  
-                                TextEditor(text: $description)
+                                TextEditor(text: $choreographyDesc)
                                     .font(.system(size: 14))
                                     .foregroundColor(.white)
                                     .scrollContentBackground(.hidden)
@@ -133,13 +133,15 @@ struct UploadDetailsView: View {
                         // MARK: - Blockchain Card
                         BlockchainRegistrationCard(
                             isRecording: $isRecording,
-                            isRecorded: $isRecorded,
+                            isRecorded: $isRecorded, add/#32
                             onComplete: {
-                                // ✅ 로딩 완료 후 ListView 탭으로 이동
+                        
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                                     tabRouter.selectedTab = .library
                                 }
                             }
+                            choreographyTitle: choreographyTitle,
+                            choreographyDesc: choreographyDescdevelop
                         )
                         .padding(.horizontal, 20)
                         .padding(.bottom, 100)
@@ -171,7 +173,11 @@ struct UploadDetailsView: View {
 struct BlockchainRegistrationCard: View {
     @Binding var isRecording: Bool
     @Binding var isRecorded: Bool
-    var onComplete: () -> Void  // ✅ 완료 콜백 추가
+    var onComplete: () -> Void  
+    let choreographyTitle: String
+    let choreographyDesc: String
+    @State private var pulseScale: CGFloat = 1.0
+
  
     var body: some View {
         VStack(spacing: 0) {
@@ -248,13 +254,45 @@ struct BlockchainRegistrationCard: View {
             .padding(.vertical, 14)
  
             Button(action: {
+                // 1. 민팅 시작 -> UI 업데이트 (Loading)
                 withAnimation(.spring()) { isRecording = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     withAnimation(.spring()) {
                         isRecording = false
                         isRecorded = true
                     }
-                    onComplete()  // ✅ 완료 후 콜백 호출
+                    onComplete() 
+                
+                // 2. 비동기 블록(Task) 시작: 외부 API 호출하기
+                Task {
+                    do {
+                        // CrossmintAPI 싱글톤을 이용해 POST 민팅 요청
+                        let transactionURL = try await CrossmintAPI.shared.mintChoreographyNFT(
+                            title: self.choreographyTitle, 
+                            description: self.choreographyDesc
+                        )
+                        
+                        // 3. 메인 스레드로 돌아와서 성공 상태 업데이트
+                        await MainActor.run {
+                            withAnimation(.spring()) { 
+                                isRecording = false
+                                isRecorded = true 
+                            }
+                            
+                            // 4. (보너스) 성공 애니메이션 잠시 본 후 Safari 브라우저에서 결과 창 오픈!
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                if let url = URL(string: transactionURL) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
+                    } catch {
+                        // 5. 에러 시 로딩 풀기 (MVP용 간단한 콘솔 출력)
+                        print("Blockchain API Minting Error: \(error)")
+                        await MainActor.run {
+                            withAnimation(.spring()) { isRecording = false }
+                        }
+                    }
                 }
             }) {
                 HStack(spacing: 10) {
