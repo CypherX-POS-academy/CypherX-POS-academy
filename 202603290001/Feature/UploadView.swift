@@ -1,6 +1,7 @@
 
 import SwiftUI
 
+import Combine
 import Photos
 import PhotosUI
  
@@ -19,6 +20,7 @@ struct UPloadView: View {
     @State private var selectedAsset: PHAsset? = nil
     @State private var recentVideos: [PHAsset] = []
     @State private var navigateToDetails = false
+    @EnvironmentObject var tabRouter: TabRouter  // ✅ 추가
  
     var body: some View {
         NavigationStack {
@@ -26,21 +28,20 @@ struct UPloadView: View {
                 Color.black.ignoresSafeArea()
  
                 VStack(spacing: 0) {
-
+ 
                     // MARK: 영상 프리뷰
                     ZStack(alignment: .topLeading) {
                         Rectangle()
                             .fill(Color(hex: "#1A1A2E"))
                             .frame(maxWidth: .infinity)
-                            .frame(height: 280)               
+                            .frame(height: 280)
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(hex: "#7B2FBE"), lineWidth: 1))
-                            .clipShape(RoundedRectangle(cornerRadius: 16)) 
-
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+ 
                         if let asset = selectedAsset {
                             AssetThumbnailView(asset: asset, size: CGSize(width: UIScreen.main.bounds.width, height: 280))
-                                .frame(height: 280)      
-                                .clipShape(RoundedRectangle(cornerRadius: 16)) 
-                                
+                                .frame(height: 280)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
                         } else {
                             VStack(spacing: 12) {
                                 Image(systemName: "video.fill")
@@ -53,9 +54,9 @@ struct UPloadView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 16))                     
-
-                    // MARK: Next버튼 - ZStack 밖, 프리뷰 바로 아래
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+ 
+                    // MARK: Next 버튼
                     if selectedAsset != nil {
                         Button(action: { navigateToDetails = true }) {
                             Text("Next")
@@ -67,10 +68,7 @@ struct UPloadView: View {
                         .background(Color(hex: "#1C1C1E"))
                     }
  
-                    // MARK: Next버튼
-                    
- 
-                    // MARK: 최근영상 스택
+                    // MARK: 최근영상 헤더
                     HStack {
                         HStack(spacing: 4) {
                             Text("Recent Videos")
@@ -81,16 +79,12 @@ struct UPloadView: View {
                                 .foregroundColor(.white)
                         }
                         Spacer()
-                        
-                        //목업에서는 복사하기, 카메라 아이콘이 있는데 아직 구현안함
-//                        Image(systemName: "square.on.square").foregroundColor(.white).font(.system(size: 16))
-//                        Image(systemName: "camera").foregroundColor(.white).font(.system(size: 16))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .background(Color(hex: "#111111"))
  
-                    // MARK: 동영상 리스트들
+                    // MARK: 동영상 리스트
                     switch authorizationStatus {
                     case .authorized, .limited:
                         ScrollView {
@@ -110,7 +104,7 @@ struct UPloadView: View {
                                     )
                                 }
                             }
-                            .padding(2)                       
+                            .padding(2)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
  
@@ -136,23 +130,14 @@ struct UPloadView: View {
             }
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToDetails) {
+                // ✅ EnvironmentObject 명시적으로 전달
                 UploadDetailsView(selectedAsset: selectedAsset)
+                    .environmentObject(tabRouter)
             }
         }
-        .onAppear { //클릭시 권한 요청로 구현함 추후 앱 첫 시작할때로 변경할 예정
+        .onAppear {
             requestPermissionAndLoadVideos()
         }
-    }
- 
-    // Helpers
-    @ViewBuilder
-    private func actionButton(icon: String) -> some View {
-        Image(systemName: icon)
-            .font(.system(size: 13))
-            .foregroundColor(.white)
-            .frame(width: 34, height: 34)
-            .background(Color.black.opacity(0.7))
-            .clipShape(Circle())
     }
  
     private func requestPermissionAndLoadVideos() {
@@ -206,7 +191,6 @@ struct VideoThumbnailCell: View {
             .frame(width: cellSize, height: cellSize)
             .clipped()
  
-            // 버퍼링
             let dur = Int(asset.duration)
             Text(String(format: "%d:%02d", dur / 60, dur % 60))
                 .font(.system(size: 10, weight: .medium))
@@ -217,12 +201,10 @@ struct VideoThumbnailCell: View {
                 .padding(4)
  
             if isSelected {
-                // 선택 테두리
                 Rectangle()
                     .stroke(Color(hex: "#BF5AF2"), lineWidth: 3)
                     .frame(width: cellSize, height: cellSize)
  
-                // 번호 뱃지
                 Circle()
                     .fill(Color(hex: "#BF5AF2"))
                     .frame(width: 22, height: 22)
@@ -246,12 +228,12 @@ struct VideoThumbnailCell: View {
     }
 }
  
-// MARK: 선택된 영상의 썸네일을 크게 보여주는 뷰예요.
+// MARK: 선택된 영상 썸네일 크게
 struct AssetThumbnailView: View {
     let asset: PHAsset
     let size: CGSize
     @State private var image: UIImage? = nil
-
+ 
     var body: some View {
         Group {
             if let img = image {
@@ -259,20 +241,20 @@ struct AssetThumbnailView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 280)      // ✅ 이 줄 추가
-                    .clipped()              // ✅ 이 줄 추가
+                    .frame(height: 280)
+                    .clipped()
             } else {
                 Color(hex: "#1A1A2E")
                     .overlay(ProgressView().tint(Color(hex: "#BF5AF2")))
             }
         }
         .onAppear { loadImage() }
-        .onChange(of: asset) { _ in   // ✅ 추가
-            image = nil               // 이전 이미지 초기화
-            loadImage()               // 새 영상 로드
+        .onChange(of: asset) { _ in
+            image = nil
+            loadImage()
         }
     }
-
+ 
     private func loadImage() {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
@@ -285,8 +267,7 @@ struct AssetThumbnailView: View {
     }
 }
  
-
- 
 #Preview {
     UPloadView()
+        .environmentObject(TabRouter())
 }

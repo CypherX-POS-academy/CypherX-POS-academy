@@ -17,6 +17,7 @@ struct UploadDetailsView: View {
     @State private var isRecording = false
     @State private var isRecorded = false
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var tabRouter: TabRouter  
  
     var body: some View {
         ZStack {
@@ -132,9 +133,15 @@ struct UploadDetailsView: View {
                         // MARK: - Blockchain Card
                         BlockchainRegistrationCard(
                             isRecording: $isRecording,
-                            isRecorded: $isRecorded,
+                            isRecorded: $isRecorded, add/#32
+                            onComplete: {
+                        
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                                    tabRouter.selectedTab = .library
+                                }
+                            }
                             choreographyTitle: choreographyTitle,
-                            choreographyDesc: choreographyDesc
+                            choreographyDesc: choreographyDescdevelop
                         )
                         .padding(.horizontal, 20)
                         .padding(.bottom, 100)
@@ -166,9 +173,11 @@ struct UploadDetailsView: View {
 struct BlockchainRegistrationCard: View {
     @Binding var isRecording: Bool
     @Binding var isRecorded: Bool
+    var onComplete: () -> Void  
     let choreographyTitle: String
     let choreographyDesc: String
     @State private var pulseScale: CGFloat = 1.0
+
  
     var body: some View {
         VStack(spacing: 0) {
@@ -247,6 +256,12 @@ struct BlockchainRegistrationCard: View {
             Button(action: {
                 // 1. 민팅 시작 -> UI 업데이트 (Loading)
                 withAnimation(.spring()) { isRecording = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation(.spring()) {
+                        isRecording = false
+                        isRecorded = true
+                    }
+                    onComplete() 
                 
                 // 2. 비동기 블록(Task) 시작: 외부 API 호출하기
                 Task {

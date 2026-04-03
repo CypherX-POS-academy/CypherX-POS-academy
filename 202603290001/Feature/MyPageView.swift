@@ -8,9 +8,11 @@
 import SwiftUI
  
 struct MyPageView: View {
-    
+ 
     @State private var showCredential: Bool = false
-    
+    @State private var selectedStyle: String = "Contemporary"
+    @State private var showAll: Bool = false  // ✅ VIEW ALL 상태
+ 
     var body: some View {
         ZStack {
             Color(hex: "#0D0D0D").ignoresSafeArea()
@@ -19,9 +21,9 @@ struct MyPageView: View {
                 CredentialModalView(isPresented: $showCredential)
                     .zIndex(1)
             }
-            
-            VStack( spacing: 0) {
-                HStack(spacing:0) {
+ 
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
                     Text("Potfolio Proof")
                         .foregroundStyle(.white)
                         .fontWeight(.bold)
@@ -40,16 +42,16 @@ struct MyPageView: View {
                 }
                 .padding(20)
                 .background(Color.clear)
-                
+ 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         ProfileHeaderSection()
                         StatsSection()
                         FeaturedVideoSection()
-                        DanceStylesSection()
-                        LatestProofsSection()
-     
-                        Spacer().frame(height: 100) // 탭바 공간
+                        DanceStylesSection(selected: $selectedStyle, showAll: $showAll)
+                        LatestProofsSection(selectedStyle: selectedStyle, showAll: showAll)
+ 
+                        Spacer().frame(height: 100)
                     }
                 }
             }
@@ -238,14 +240,16 @@ struct FeaturedVideoSection: View {
 }
  
 // MARK: - 댄스 스타일 섹션
+import SwiftUI
+ 
 struct DanceStylesSection: View {
     let styles = ["Contemporary", "Urban", "Lyrical", "Cinematic", "Jazz-Funk"]
-    @State private var selected = "Contemporary"
+    @Binding var selected: String
+    @Binding var showAll: Bool
  
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                // 화살표 라인
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 13))
@@ -258,8 +262,12 @@ struct DanceStylesSection: View {
  
                 Spacer()
  
-                Button(action: {}) {
-                    Text("VIEW ALL")
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showAll.toggle()
+                    }
+                }) {
+                    Text(showAll ? "COLLAPSE" : "VIEW ALL")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Color(hex: "#BF5AF2"))
                         .tracking(0.5)
@@ -267,19 +275,24 @@ struct DanceStylesSection: View {
             }
             .padding(.horizontal, 20)
  
-            // 태그 칩들
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
                     ForEach(styles.prefix(3), id: \.self) { style in
-                        StyleChip(label: style, isSelected: selected == style) {
-                            selected = style
+                        StyleChip(label: style, isSelected: selected == style && !showAll) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showAll = false
+                                selected = style
+                            }
                         }
                     }
                 }
                 HStack(spacing: 10) {
                     ForEach(styles.suffix(2), id: \.self) { style in
-                        StyleChip(label: style, isSelected: selected == style) {
-                            selected = style
+                        StyleChip(label: style, isSelected: selected == style && !showAll) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showAll = false
+                                selected = style
+                            }
                         }
                     }
                 }
@@ -289,8 +302,7 @@ struct DanceStylesSection: View {
         .padding(.bottom, 28)
     }
 }
-
-// MARK: - 댄스 스타일 섹션에 카테고리 버튼들
+ 
 struct StyleChip: View {
     let label: String
     let isSelected: Bool
@@ -310,73 +322,111 @@ struct StyleChip: View {
         }
     }
 }
+
  
 // MARK: - 최근 증명 섹션
 struct LatestProofsSection: View {
-    let proofs: [(title: String, imageName: String)] = [
-        ("Hip-Hop Flow", "proof1"),
-        ("Urban Street", "proof2"),
-        ("Contemporary", "proof3"),
+    let selectedStyle: String
+    let showAll: Bool
+ 
+    let proofByStyle: [String: (title: String, imageName: String)] = [
+        "Contemporary": ("Contemporary", "proof3"),
+        "Urban":        ("Urban Street",  "proof2"),
+        "Lyrical":      ("Lyrical Stage", "proof4"),
+        "Cinematic":    ("Hip-Hop Flow",  "proof1"),
+        "Jazz-Funk":    ("Hip-Hop Flow",  "proof1"),
+    ]
+ 
+    // VIEW ALL일 때 보여줄 전체 목록 (순서 고정)
+    let allProofs: [(title: String, imageName: String)] = [
+        ("Hip-Hop Flow",  "proof1"),
+        ("Urban Street",  "proof2"),
+        ("Contemporary",  "proof3"),
         ("Lyrical Stage", "proof4"),
     ]
-
+ 
+    var currentProof: (title: String, imageName: String) {
+        proofByStyle[selectedStyle] ?? ("Contemporary", "proof3")
+    }
+ 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Latest Proofs")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .padding(.horizontal, 20)
-
-            LazyVGrid(
-                columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
-                spacing: 8
-            ) {
-                ForEach(proofs, id: \.title) { proof in
-                    ZStack(alignment: .topTrailing) {
-                        // 실제 이미지
-                        Image(proof.imageName)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 160)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-
-                        // 블록체인 인증 아이콘
-                        Image(systemName: "checkmark.shield.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(Color(hex: "#BF5AF2"))
-                            .padding(8)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Circle())
-                            .padding(8)
-
-                        // 하단 제목
-                        VStack {
-                            Spacer()
-                            HStack {
-                                Text(proof.title)
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                Spacer()
-                            }
-                            .background(
-                                LinearGradient(
-                                    colors: [Color.clear, Color.black.opacity(0.7)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+ 
+            if showAll {
+                // ✅ 전체 그리드 뷰
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                    spacing: 8
+                ) {
+                    ForEach(allProofs, id: \.title) { proof in
+                        ProofCard(title: proof.title, imageName: proof.imageName, height: 160)
                     }
-                    .frame(height: 160)
                 }
+                .padding(.horizontal, 20)
+                .transition(.opacity.combined(with: .scale(scale: 0.97)))
+            } else {
+                // ✅ 선택된 스타일 1장 크게
+                ProofCard(title: currentProof.title, imageName: currentProof.imageName, height: 320)
+                    .padding(.horizontal, 20)
+                    .transition(.opacity.combined(with: .scale(scale: 0.97)))
             }
-            .padding(.horizontal, 20)
         }
+        .animation(.easeInOut(duration: 0.3), value: showAll)
+        .animation(.easeInOut(duration: 0.3), value: selectedStyle)
     }
 }
+ 
+// MARK: - 공통 카드 컴포넌트
+struct ProofCard: View {
+    let title: String
+    let imageName: String
+    let height: CGFloat
+ 
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+ 
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "#BF5AF2"))
+                .padding(8)
+                .background(Color.black.opacity(0.5))
+                .clipShape(Circle())
+                .padding(10)
+ 
+            VStack {
+                Spacer()
+                HStack {
+                    Text(title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                    Spacer()
+                }
+                .background(
+                    LinearGradient(
+                        colors: [Color.clear, Color.black.opacity(0.75)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .frame(height: height)
+    }
+}
+
  
 #Preview {
     MyPageView()
